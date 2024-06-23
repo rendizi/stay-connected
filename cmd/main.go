@@ -3,8 +3,9 @@ package main
 import(
 	"github.com/joho/godotenv"
 	"log"
-	"stay-connected/internal/services/inst"
-	"os"
+	"stay-connected/internal/daily-fetcher"
+    "github.com/jasonlvhit/gocron"
+
 )
 
 func main(){
@@ -12,10 +13,29 @@ func main(){
 	if err != nil{
 		log.Fatal(err)
 	}
-	inst, err := stories.LoginToInst(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"))
-	if err != nil{
-		log.Fatal(err)
-	}
-	l := stories.SummarizeInstagramStories(inst)
-	log.Println(l[0])
+
+	
+
+	//users, err := db.Insert(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"), "baglanov.a0930@gmail.com")
+	//if err != nil{
+	//	log.Fatal(err)
+	//}
+	//log.Println(users)
+
+	daily.Do()
+
+	s := gocron.NewScheduler()
+    s.Every(1).Days().Do(daily.Do)
+    <- s.Start()
+
+	//fullusers, err := db.Get()
+	//if err != nil{
+	//	log.Fatal(err)
+	//}
+	//log.Println(fullusers)
+
+	//return 
+
+	//l := stories.SummarizeInstagramStories(inst)
+	//log.Println(l[0])
 }
