@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
-	"github.com/joho/godotenv"
-	"log"
 	"net/http"
 	"os"
 	"stay-connected/internal/handler"
@@ -12,12 +10,6 @@ import (
 )
 
 func main() {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	db.InitSupabase()
 
 	mux := http.NewServeMux()
@@ -64,7 +56,7 @@ func main() {
 		})
 	}
 
-	err = http.ListenAndServe("localhost:8080", corsHandler(mux))
+	err := http.ListenAndServe("localhost:8080", corsHandler(mux))
 	fmt.Println(err)
 	if err != nil {
 		if err == http.ErrServerClosed {
