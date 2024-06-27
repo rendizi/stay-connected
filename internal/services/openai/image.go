@@ -35,7 +35,7 @@ func SummarizeImage(url string, prompt string)(string, error){
 					},
 				},
 			},
-			"max_tokens": 300,
+			"max_tokens": 75,
 		}).
         Post(apiEndpoint)
 

@@ -1,15 +1,26 @@
-package db 
+package db
 
-type User struct{
-	Username string `json:"username"`
+type InsertUser struct {
 	Password string `json:"password"`
-	Email string `json:"email"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
 }
 
-type FullUser struct{
+type GetUser struct {
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	Id       int8   `json:"id"`
+	Username string `json:"username"`
+}
+
+type Usage struct {
+	Used   int8 `json:"used"`
+	Limit  int8 `json:"limit"`
+	UserId int8 `json:"user_id"`
+}
+
+type Instagram struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Email string `json:"email"`
-	Usage int8 `json:"usage"`
-	Limit int8 `json:"limit"`
+	UserId   int8   `json:"user_id"`
 }
