@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
+	"log"
 	"net/http"
 	"os"
 	daily "stay-connected/internal/daily-fetcher"
@@ -14,6 +15,8 @@ import (
 func main() {
 	db.InitSupabase()
 
+	users, err := db.GetUsers()
+	log.Println(users, err)
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /api/v1/register", httplog.Logger(http.HandlerFunc(handler.Register)))
@@ -63,7 +66,7 @@ func main() {
 	}
 	fmt.Println("server is listening")
 
-	err := http.ListenAndServe(":8080", corsHandler(mux))
+	err = http.ListenAndServe(":8080", corsHandler(mux))
 	fmt.Println(err)
 	if err != nil {
 		if err == http.ErrServerClosed {
