@@ -55,6 +55,7 @@ func main() {
 			next.ServeHTTP(w, r)
 		})
 	}
+	fmt.Println("server is listening")
 
 	err := http.ListenAndServe("localhost:8080", corsHandler(mux))
 	fmt.Println(err)
