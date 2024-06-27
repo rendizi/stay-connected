@@ -13,14 +13,14 @@ import (
 
 func main() {
 	db.InitSupabase()
-	
+
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /api/v1/register", httplog.Logger(http.HandlerFunc(handler.Register)))
 	mux.Handle("POST /api/v1/login", httplog.Logger(http.HandlerFunc(handler.Login)))
 	mux.Handle("PUT /api/v1/credentials", httplog.Logger(http.HandlerFunc(handler.UpdateCredentials)))
 	mux.Handle("DELETE /api/v1/credentials", httplog.Logger(http.HandlerFunc(handler.DeleteCredentials)))
-	mux.Handle("/health", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/api/v1/health", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		server.Ok(map[string]interface{}{"message": "alright"}, w)
 	})))
 

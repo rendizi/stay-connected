@@ -14,6 +14,7 @@ import (
 var supabase *supa.Client
 
 func InitSupabase() {
+	log.Println("Connecting to db...")
 	supabase = supa.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_KEY"))
 }
 
