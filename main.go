@@ -62,7 +62,7 @@ func main() {
 	}
 	fmt.Println("server is listening")
 
-	err := http.ListenAndServe("0.0.0.0:8080", corsHandler(mux))
+	err := http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), corsHandler(mux))
 	fmt.Println(err)
 	if err != nil {
 		if err == http.ErrServerClosed {
