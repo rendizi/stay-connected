@@ -22,17 +22,18 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 	var used int8
 	used = 0
 	reachedLimit := false
+	log.Println("there")
 
-	for i, story := range stories {
-		if i == 2 {
-			break
-		}
+	for _, story := range stories {
 		if reachedLimit {
 			break
 		}
 		temp := make([]openai.StoriesType, 0)
 
 		if story != nil {
+			if (story.User.Username != "zeinaddin_"){
+				continue
+			}
 			log.Println("By:", story.User.Username)
 			profile, err := insta.VisitProfile(story.User.Username)
 			if err != nil {

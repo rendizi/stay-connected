@@ -3,14 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
 	"os"
+	daily "stay-connected/internal/daily-fetcher"
 	"stay-connected/internal/handler"
 	"stay-connected/internal/server"
 	"stay-connected/internal/services/db"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 	db.InitSupabase()
 
 	mux := http.NewServeMux()
@@ -28,7 +35,7 @@ func main() {
 	//}
 	//log.Println(users)
 
-	//go daily.Do()
+	go daily.Do()
 	//err = mailer.Send("alikhan2008ba@gmail.com", "something")
 	//log.Fatal(err)
 
@@ -61,7 +68,7 @@ func main() {
 	}
 	fmt.Println("server is listening")
 
-	err := http.ListenAndServe("localhost:8080", corsHandler(mux))
+	err = http.ListenAndServe("localhost:8080", corsHandler(mux))
 	fmt.Println(err)
 	if err != nil {
 		if err == http.ErrServerClosed {
