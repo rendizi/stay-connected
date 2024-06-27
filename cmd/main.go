@@ -7,6 +7,7 @@ import (
 	"os"
 	"stay-connected/internal/handler"
 	"stay-connected/internal/services/db"
+	"stay-connected/internal/server"
 )
 
 func main() {
@@ -17,6 +18,9 @@ func main() {
 	mux.Handle("POST /api/v1/login", httplog.Logger(http.HandlerFunc(handler.Login)))
 	mux.Handle("PUT /api/v1/credentials", httplog.Logger(http.HandlerFunc(handler.UpdateCredentials)))
 	mux.Handle("DELETE /api/v1/credentials", httplog.Logger(http.HandlerFunc(handler.DeleteCredentials)))
+	mux.Handle("/health", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+		server.Ok(map[string]interface{}{"message":"alright"},w)
+	})))
 
 	//users, err := db.Insert(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"), "baglanov.a0930@gmail.com")
 	//if err != nil{
