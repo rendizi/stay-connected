@@ -13,6 +13,7 @@ import (
 
 func main() {
 	db.InitSupabase()
+	
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /api/v1/register", httplog.Logger(http.HandlerFunc(handler.Register)))
