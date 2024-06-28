@@ -22,6 +22,9 @@ func main() {
 	mux.Handle("/api/v1/health", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		server.Ok(map[string]interface{}{"message": "alright"}, w)
 	})))
+	mux.Handle("/api/v1/daily", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		go daily.Do()
+	})))
 
 	//users, err := db.Insert(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"), "baglanov.a0930@gmail.com")
 	//if err != nil{
