@@ -97,7 +97,7 @@ func UnlinkInstagram(userId int8) error {
 	return err
 }
 
-func LinkTelegram(userId int8, telegramId int8) error {
+func LinkTelegram(userId int8, telegramId int64) error {
 	updateData := map[string]interface{}{
 		"telegram": telegramId,
 	}
