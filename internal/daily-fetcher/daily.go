@@ -107,7 +107,7 @@ func formatStoriesForTelegram(stories []openai.StoriesType) string {
 
 	builder.WriteString("**What is going on today?:**\n\n")
 	for _, story := range stories {
-		builder.WriteString(fmt.Sprintf("• **%s:**: __%s__\n", story.Author, story.Summarize))
+		builder.WriteString(fmt.Sprintf("• **%s**: __%s__\n", story.Author, story.Summarize))
 	}
 
 	return builder.String()
@@ -160,7 +160,7 @@ func formatStoriesForEmail(stories []openai.StoriesType) string {
 	for _, story := range stories {
 		builder.WriteString(fmt.Sprintf(`
         <div class="story">
-            <div class="summary"><span style="font-weight: bold; color: #555;">%s</span>%s</div>
+            <div class="summary"><span style="font-weight: bold; color: #555;">%s:</span>%s</div>
         </div>
         `, story.Author, story.Summarize))
 	}

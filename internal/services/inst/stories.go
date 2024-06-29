@@ -24,16 +24,16 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 	reachedLimit := false
 	log.Println("there")
 
-	for _, story := range stories {
+	for i, story := range stories {
+		if i >= 3 {
+			break
+		}
 		if reachedLimit {
 			break
 		}
 		temp := make([]openai.StoriesType, 0)
 
 		if story != nil {
-			if (story.User.Username != "zeinaddin_"){
-				continue
-			}
 			log.Println("By:", story.User.Username)
 			profile, err := insta.VisitProfile(story.User.Username)
 			if err != nil {
@@ -50,20 +50,22 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 			for _, stories := range profilesStories.Reel.Items {
 				for _, media := range stories.Images.Versions {
 
-					prompt := fmt.Sprintf("I have an image from an %s's(use it when want to write about him instead of writing 'user') Instagram story. Your task is to determine if it contains any interesting or relevant information about the person's life. If it does, summarize this information in 1 short sentence. If the image content is not related to the person's personal life, not inteserting or important activities, return empty response. Give logically connected summarize based on old storieses(if it is empty- don't say me it is empty, give result only based on photo or return empty response):%s. Don't repeat what is already summarized and in old storieses. Additional stories info: events: %s, hashtags: %s, polls: %s, locations: %s, questions: %s, sliders: %s, mentions: %s. Maximum tokens: 75, write it as simple as possible, like people would say, use simple words",
+					prompt := fmt.Sprintf("I have an image from an %s's(use it when want to write about him instead of writing 'user') Instagram story. Your task is to determine if it contains any interesting or relevant information about the person's life. If it does, summarize this information in 1 short sentence. If the image content is not related to the person's personal life, not inteserting or important activities, return following response: 'Nothing interesting'. Give logically connected summarize based on old storieses(if it is empty- don't say me it is empty, give result only based on photo or return empty response):%s. Don't repeat what is already summarized and in old storieses. Additional stories info: events: %s, hashtags: %s, polls: %s, locations: %s, questions: %s, sliders: %s, mentions: %s. Maximum tokens: 75, write it as simple as possible, like people would say, use simple words",
 						story.User.Username, temp, stories.StoryEvents, stories.StoryHashtags, stories.StoryPolls, stories.StoryLocations, stories.StorySliders, stories.StoryQuestions, stories.Mentions)
 					resp, err := openai.SummarizeImage(media.URL, prompt)
 					log.Println(media.URL)
 					if err != nil {
 						log.Println(err)
 					}
-					var tempStoriesType openai.StoriesType
-					tempStoriesType.Author = story.User.Username
-					tempStoriesType.Summarize = resp
-					if profile.User.Friendship.FollowedBy {
-						temp = append([]openai.StoriesType{tempStoriesType}, temp...)
-					} else {
-						temp = append(temp, tempStoriesType)
+					if resp != "Nothing interesting" {
+						var tempStoriesType openai.StoriesType
+						tempStoriesType.Author = story.User.Username
+						tempStoriesType.Summarize = resp
+						if profile.User.Friendship.FollowedBy {
+							temp = append([]openai.StoriesType{tempStoriesType}, temp...)
+						} else {
+							temp = append(temp, tempStoriesType)
+						}
 					}
 					used += 1
 					if used >= left {
@@ -76,10 +78,12 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 			if err != nil {
 				continue
 			}
-			var usersStories openai.StoriesType
-			usersStories.Author = story.User.Username
-			usersStories.Summarize = summarize
-			storiesArray = append(storiesArray, usersStories)
+			if summarize != "Nothing interesting" {
+				var usersStories openai.StoriesType
+				usersStories.Author = story.User.Username
+				usersStories.Summarize = summarize
+				storiesArray = append(storiesArray, usersStories)
+			}
 		}
 	}
 	return used, storiesArray
