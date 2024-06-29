@@ -76,26 +76,19 @@ func processUsers(users []db.Instagram) {
 				log.Println(err)
 				return
 			}
-			if telegramId == -1 {
-				//send via email
-				formatter := formatStoriesForEmail(result)
-				err = mailer.Send(email, formatter)
+			if telegramId != -1 {
+				formatted := formatStoriesForTelegram(result)
+				err = telegram.SendMessage(telegramId, formatted)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-
-			} else {
-				formatted := formatStoriesForTelegram(result)
-				err = telegram.SendMessage(telegramId, formatted)
-				if err != nil {
-					formatter := formatStoriesForEmail(result)
-					err = mailer.Send(email, formatter)
-					if err != nil {
-						log.Println(err)
-						return
-					}
-				}
+			}
+			formatter := formatStoriesForEmail(result)
+			err = mailer.Send(email, formatter)
+			if err != nil {
+				log.Println(err)
+				return
 			}
 
 			err = db.Used(u.UserId, used)
