@@ -130,7 +130,7 @@ func GetEmail(id int8) (string, int8, error) {
 	if err != nil {
 		return "", 0, err
 	}
-	return data[0]["email"].(string), data[0]["telegram"].(int8), nil
+	return data[0]["email"].(string), int8(data[0]["telegram"].(float64)), nil
 }
 
 func LeftToReactLimit(id int8) (int8, error) {
