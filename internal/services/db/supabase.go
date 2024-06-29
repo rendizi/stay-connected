@@ -99,7 +99,7 @@ func UnlinkInstagram(userId int8) error {
 
 func LinkTelegram(userId int8, telegramId int8) error {
 	updateData := map[string]interface{}{
-		"telegramId": telegramId,
+		"telegram": telegramId,
 	}
 	var data map[string]interface{}
 	err := supabase.DB.From("users").Update(updateData).Eq("id", fmt.Sprintf("%d", userId)).Execute(&data)
