@@ -17,7 +17,7 @@ var botToken = os.Getenv("TELEGRAM_BOT_TOKEN")
 var bot *tb.Bot
 
 // Initialize the Telegram bot
-func InitTelegram() (*tb.Bot, error) {
+func InitTelegram() error {
 	log.Println(botToken)
 	pref := tb.Settings{
 		Token:  botToken,
@@ -27,10 +27,15 @@ func InitTelegram() (*tb.Bot, error) {
 
 	bot, err = tb.NewBot(pref)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize bot: %w", err)
+		return fmt.Errorf("failed to initialize bot: %w", err)
 	}
 
-	return bot, nil
+	bot.Handle("/start", HandleStart)
+	bot.Handle(tb.OnText, HandleMessages)
+
+	bot.Start()
+
+	return nil
 }
 
 // State management
@@ -88,9 +93,9 @@ func HandleMessages(c tb.Context) error {
 }
 
 func SendMessage(telegramId int, text string) error {
-	log.Println(telegramId)
-	log.Println(int64(telegramId))
 	recipient := &tb.User{ID: int64(telegramId)}
+	log.Println(92)
+	log.Println(bot)
 	_, err := bot.Send(recipient, text)
 	if err != nil {
 		return fmt.Errorf("failed to send message: %w", err)

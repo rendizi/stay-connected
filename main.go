@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
-	tb "gopkg.in/telebot.v3"
 	"log"
 	"net/http"
 	"os"
@@ -30,15 +29,10 @@ func main() {
 	})))
 
 	go func() {
-		bot, err := telegram.InitTelegram()
+		err := telegram.InitTelegram()
 		if err != nil {
 			log.Fatalf("Could not initialize bot: %v", err)
 		}
-		bot.Handle("/start", telegram.HandleStart)
-		bot.Handle(tb.OnText, telegram.HandleMessages)
-
-		log.Println("Bot is running...")
-		bot.Start()
 
 	}()
 	telegram.SendMessage(939659614, "some")
