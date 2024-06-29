@@ -26,7 +26,7 @@ func SummarizeImagesToOne(userPrompt []StoriesType) (string, error) {
 			"messages": []interface{}{
 				map[string]interface{}{
 					"role":    "system",
-					"content": "You are given array of storieses summarize. I am very busy so give the most interesting ones, make them shorter without losing an idea. Maximum symbols-100, don't use markup symbols. Response should be like 1 text, no need to divide into ordered/unordered list. If is is empty or there is information that is possibly not related with someone's life or not interesting- return 'Nothing interesting'. Write simple",
+					"content": "You are given array of storieses summarize. I am very busy so give the most interesting ones, make them shorter without losing an idea. Maximum symbols-100, don't use markup symbols. Response should be like 1 text, no need to divide into ordered/unordered list. If is is empty or there is information not interesting and not related with someone's life- return 'Nothing interesting'. Write simple",
 				},
 				map[string]interface{}{
 					"role":    "user",

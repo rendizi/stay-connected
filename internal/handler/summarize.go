@@ -143,6 +143,7 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 		if sendMessageWithCheck(conn, "Summarizing all processed images into one result...") {
 			break
 		}
+		log.Println(temp)
 		summarize, err := openai.SummarizeImagesToOne(temp)
 		if err != nil {
 			log.Printf("Failed to summarize images into one result: %v", err)
