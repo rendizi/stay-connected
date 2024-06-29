@@ -23,8 +23,9 @@ func InitTelegram() (*tb.Bot, error) {
 		Token:  botToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	}
+	var err error
 
-	bot, err := tb.NewBot(pref)
+	bot, err = tb.NewBot(pref)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize bot: %w", err)
 	}
@@ -74,7 +75,6 @@ func HandleMessages(c tb.Context) error {
 			userData[user.ID].Password = "awaiting_email"
 			return c.Send(err.Error() + ". Awaiting for email")
 		}
-
 		err = db.LinkTelegram(id, user.ID)
 		if err != nil {
 			userData[user.ID].Password = "awaiting_email"
