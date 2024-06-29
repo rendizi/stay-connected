@@ -125,6 +125,9 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 						Author:    string(p),
 						Summarize: resp,
 					}
+					if sendMessageWithCheck(conn, tempStoriesType.Summarize) {
+						break
+					}
 					if profile.User.Friendship.FollowedBy {
 						temp = append([]openai.StoriesType{tempStoriesType}, temp...)
 					} else {
