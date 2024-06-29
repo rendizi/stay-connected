@@ -89,6 +89,7 @@ func GenerateVideoJson(medias []Asset) (Data, error) {
 	timeline.Soundtrack.Src = "https://shotstack-assets.s3-ap-southeast-2.amazonaws.com/music/freepd/advertising.mp3"
 	timeline.Soundtrack.Effect = "fadeInFadeOut"
 	resultRequest.Timeline = timeline
+	log.Println(resultRequest)
 	return resultRequest, nil
 }
 
