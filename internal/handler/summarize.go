@@ -43,9 +43,15 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Printf("Received message from client: %s", p)
-		sendMessage(conn, "Read message from client")
+		if sendMessageWithCheck(conn, "Read message from client") {
+			break
+		}
 
 		log.Println("Attempting to login to Instagram...")
+		if sendMessageWithCheck(conn, "Attempting to login to Instagram...") {
+			break
+		}
+
 		inst, err := stories.LoginToInst(os.Getenv("TEST_INSTAGRAM_USERNAME"), os.Getenv("TEST_INSTAGRAM_PASSWORD"))
 		if err != nil {
 			log.Printf("Failed to login to Instagram: %v", err)
@@ -53,13 +59,15 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Println("Successfully logged in to Instagram.")
-		sendMessage(conn, "Logged in to Instagram")
-
-		// Step 2: Read message from client
-		log.Println("Waiting to read message from client...")
+		if sendMessageWithCheck(conn, "Successfully logged in to Instagram.") {
+			break
+		}
 
 		// Step 3: Visit profile
 		log.Printf("Attempting to visit Instagram profile: %s", string(p))
+		if sendMessageWithCheck(conn, fmt.Sprintf("Attempting to visit Instagram profile: %s", string(p))) {
+			break
+		}
 		profile, err := inst.VisitProfile(string(p))
 		if err != nil {
 			log.Printf("Failed to visit Instagram profile: %v", err)
@@ -67,10 +75,15 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Println("Successfully visited Instagram profile.")
-		sendMessage(conn, "Visited profile")
+		if sendMessageWithCheck(conn, "Visited profile") {
+			break
+		}
 
 		// Step 4: Get user's stories
 		log.Println("Attempting to retrieve user's stories...")
+		if sendMessageWithCheck(conn, "Attempting to retrieve user's stories...") {
+			break
+		}
 		profilesStories, err := profile.User.Stories()
 		if err != nil {
 			log.Printf("Failed to retrieve user's stories: %v", err)
@@ -78,11 +91,16 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Println("Successfully retrieved user's stories.")
-		sendMessage(conn, "Got user's stories")
+		if sendMessageWithCheck(conn, "Got user's stories") {
+			break
+		}
 
 		// Step 5: Process stories and send summarized results
 		temp := make([]openai.StoriesType, 0)
 		log.Println("Processing user's stories for summarization...")
+		if sendMessageWithCheck(conn, "Processing user's stories for summarization...") {
+			break
+		}
 		for _, story := range profilesStories.Reel.Items {
 			for _, media := range story.Images.Versions {
 				log.Printf("Summarizing image: %s", media.URL)
@@ -94,7 +112,9 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				log.Println("Image summarized successfully.")
-				sendMessage(conn, "Summarized image")
+				if sendMessageWithCheck(conn, "Summarized image") {
+					break
+				}
 
 				if resp != "Nothing interesting" {
 					tempStoriesType := openai.StoriesType{
@@ -112,6 +132,9 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 
 		// Summarize all images to one result
 		log.Println("Summarizing all processed images into one result...")
+		if sendMessageWithCheck(conn, "Summarizing all processed images into one result...") {
+			break
+		}
 		summarize, err := openai.SummarizeImagesToOne(temp)
 		if err != nil {
 			log.Printf("Failed to summarize images into one result: %v", err)
@@ -119,7 +142,9 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Println("Images summarized into one result successfully.")
-		sendMessage(conn, summarize)
+		if sendMessageWithCheck(conn, summarize) {
+			break
+		}
 
 		// Close the connection after processing
 		log.Println("Finished processing. Closing connection.")
@@ -128,10 +153,27 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func sendMessageWithCheck(conn *websocket.Conn, message string) bool {
+	log.Printf("Sending message to client: %s", message)
+	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+	if err != nil {
+		log.Printf("Error sending message '%s': %v", message, err)
+		log.Println("Closing WebSocket connection due to send error...")
+		conn.Close()
+		log.Println("WebSocket connection closed due to send error.")
+		return true
+	}
+	return false
+}
+
 func sendMessage(conn *websocket.Conn, message string) {
 	log.Printf("Sending message to client: %s", message)
 	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
 	if err != nil {
 		log.Printf("Error sending message '%s': %v", message, err)
+		log.Println("Closing WebSocket connection due to send error...")
+		conn.Close()
+		log.Println("WebSocket connection closed due to send error.")
+		return
 	}
 }
