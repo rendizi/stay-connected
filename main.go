@@ -48,9 +48,11 @@ func main() {
 	//err = mailer.Send("alikhan2008ba@gmail.com", "something")
 	//log.Fatal(err)
 
-	s := gocron.NewScheduler()
-	s.Every(1).Days().Do(daily.Do)
-	<-s.Start()
+	go func() {
+		s := gocron.NewScheduler()
+		s.Every(1).Days().Do(daily.Do)
+		<-s.Start()
+	}()
 
 	//fullusers, err := db.Get()
 	//if err != nil{
