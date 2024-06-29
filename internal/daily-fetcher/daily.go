@@ -89,8 +89,12 @@ func processUsers(users []db.Instagram) {
 				formatted := formatStoriesForTelegram(result)
 				err = telegram.SendMessage(telegramId, formatted)
 				if err != nil {
-					log.Println(err)
-					return
+					formatter := formatStoriesForEmail(result)
+					err = mailer.Send(email, formatter)
+					if err != nil {
+						log.Println(err)
+						return
+					}
 				}
 			}
 
