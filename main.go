@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
+	tb "gopkg.in/telebot.v3"
+	"log"
 	"net/http"
 	"os"
 	daily "stay-connected/internal/daily-fetcher"
 	"stay-connected/internal/handler"
 	"stay-connected/internal/server"
 	"stay-connected/internal/services/db"
+	"stay-connected/internal/services/telegram"
 )
 
 func main() {
@@ -25,6 +28,18 @@ func main() {
 	mux.Handle("/api/v1/daily", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		go daily.Do()
 	})))
+
+	go func() {
+		bot, err := telegram.InitTelegram()
+		if err != nil {
+			log.Fatalf("Could not initialize bot: %v", err)
+		}
+		bot.Handle("/start", telegram.HandleStart)
+		bot.Handle(tb.OnText, telegram.HandleMessages)
+
+		log.Println("Bot is running...")
+		bot.Start()
+	}()
 
 	//users, err := db.Insert(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"), "baglanov.a0930@gmail.com")
 	//if err != nil{

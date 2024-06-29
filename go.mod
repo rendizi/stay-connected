@@ -7,9 +7,9 @@ require (
 	github.com/MadAppGang/httplog v1.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-resty/resty/v2 v2.13.1
-	github.com/joho/godotenv v1.5.1
 	github.com/nedpals/supabase-go v0.4.0
 	golang.org/x/crypto v0.23.0
+	gopkg.in/telebot.v3 v3.3.6
 )
 
 require (

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func Send(email string, bodyText string) error {
+func Send(email string, bodyHTML string) error {
 	auth := smtp.PlainAuth(
 		"",
 		os.Getenv("EMAIL_FROM"),
@@ -16,9 +16,12 @@ func Send(email string, bodyText string) error {
 	from := os.Getenv("EMAIL_FROM")
 	subject := "Subject: Daily inst\n"
 	to := "To: " + email + "\n"
-	bodyText += "\n\n View more on website: somehost"
 
-	msg := []byte(to + "From: " + from + "\n" + subject + "\n" + bodyText)
+	// Add the MIME header for HTML content
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n"
+
+	// Combine headers and body into the final message
+	msg := []byte(to + "From: " + from + "\n" + subject + mime + "\n" + bodyHTML)
 
 	err := smtp.SendMail(
 		"smtp.gmail.com:587",

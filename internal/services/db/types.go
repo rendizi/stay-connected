@@ -11,6 +11,7 @@ type GetUser struct {
 	Email    string `json:"email"`
 	Id       int8   `json:"id"`
 	Username string `json:"username"`
+	Telegram string `json:"telegram"`
 }
 
 type Usage struct {

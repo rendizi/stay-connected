@@ -8,6 +8,9 @@ import (
 	"stay-connected/internal/services/db"
 	"stay-connected/internal/services/inst"
 	"stay-connected/internal/services/mailer"
+	"stay-connected/internal/services/openai"
+	"stay-connected/internal/services/telegram"
+	"strings"
 	"sync"
 	"time"
 )
@@ -68,16 +71,27 @@ func processUsers(users []db.Instagram) {
 				log.Println(res)
 			}
 
-			email, err := db.GetEmail(u.UserId)
+			email, telegramId, err := db.GetEmail(u.UserId)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			//send via email
-			err = mailer.Send(email, fmt.Sprintf("%s", result))
-			if err != nil {
-				log.Println(err)
-				return
+			if telegramId == -1 {
+				//send via email
+				formatter := formatStoriesForEmail(result)
+				err = mailer.Send(email, formatter)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+			} else {
+				formatted := formatStoriesForTelegram(result)
+				err = telegram.SendMessage(telegramId, formatted)
+				if err != nil {
+					log.Println(err)
+					return
+				}
 			}
 
 			err = db.Used(u.UserId, used)
@@ -89,4 +103,81 @@ func processUsers(users []db.Instagram) {
 	}
 
 	wg.Wait()
+}
+
+func formatStoriesForTelegram(stories []openai.StoriesType) string {
+	var builder strings.Builder
+
+	builder.WriteString("*What is going on today?:*\n")
+	for _, story := range stories {
+		builder.WriteString(fmt.Sprintf("• *%s:*: _%s_\n", story.Author, story.Summarize))
+	}
+
+	return builder.String()
+}
+
+func formatStoriesForEmail(stories []openai.StoriesType) string {
+	var builder strings.Builder
+
+	builder.WriteString(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .story {
+            margin-bottom: 20px;
+        }
+        .author {
+            font-weight: bold;
+            color: #555;
+        }
+        .summary {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">List of Stories</div>
+        <hr>
+`)
+
+	for _, story := range stories {
+		builder.WriteString(fmt.Sprintf(`
+        <div class="story">
+            <div class="author">Author: %s</div>
+            <div class="summary">Summary: %s</div>
+        </div>
+        `, story.Author, story.Summarize))
+	}
+
+	builder.WriteString(`
+    </div>
+</body>
+</html>
+`)
+
+	return builder.String()
 }

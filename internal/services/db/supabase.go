@@ -97,6 +97,15 @@ func UnlinkInstagram(userId int8) error {
 	return err
 }
 
+func LinkTelegram(userId int8, telegramId int8) error {
+	updateData := map[string]interface{}{
+		"telegramId": telegramId,
+	}
+	var data map[string]interface{}
+	err := supabase.DB.From("users").Update(updateData).Eq("id", fmt.Sprintf("%d", userId)).Execute(&data)
+	return err
+}
+
 func GetUsers() ([]GetUser, error) {
 	var data []GetUser
 	err := supabase.DB.From("users").Select("*").Execute(&data)
@@ -115,13 +124,13 @@ func GetInstas() ([]Instagram, error) {
 	return data, nil
 }
 
-func GetEmail(id int8) (string, error) {
+func GetEmail(id int8) (string, int8, error) {
 	var data []map[string]interface{}
 	err := supabase.DB.From("users").Select("*").Eq("id", fmt.Sprintf("%d", id)).Execute(&data)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	return data[0]["email"].(string), nil
+	return data[0]["email"].(string), data[0]["telegram"].(int8), nil
 }
 
 func LeftToReactLimit(id int8) (int8, error) {
