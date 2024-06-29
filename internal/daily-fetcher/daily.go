@@ -156,9 +156,13 @@ func formatStoriesForEmail(stories []openai.StoriesType) string {
         .author {
             font-weight: bold;
             color: #555;
+            display: inline-block; /* Ensures author and summary are on the same line */
+            width: 120px; /* Adjust width as needed */
         }
         .summary {
             margin-top: 5px;
+            display: inline-block; /* Ensures author and summary are on the same line */
+            width: calc(100% - 140px); /* Adjust width considering author's width */
         }
     </style>
 </head>
@@ -171,8 +175,8 @@ func formatStoriesForEmail(stories []openai.StoriesType) string {
 	for _, story := range stories {
 		builder.WriteString(fmt.Sprintf(`
         <div class="story">
-            <div class="author">Author: %s</div>
-            <div class="summary">Summary: %s</div>
+            <div class="author">%s:</div>
+            <div class="summary">%s</div>
         </div>
         `, story.Author, story.Summarize))
 	}
