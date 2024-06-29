@@ -101,15 +101,19 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 		if sendMessageWithCheck(conn, "Processing user's stories for summarization...") {
 			break
 		}
-		for _, story := range profilesStories.Reel.Items {
-			for _, media := range story.Images.Versions {
+		for i, stories := range profilesStories.Reel.Items {
+			if i >= 10 {
+				break
+			}
+			for _, media := range stories.Images.Versions {
 				log.Printf("Summarizing image: %s", media.URL)
-				prompt := fmt.Sprintf("Summarize this story with context: %s", string(p))
+				prompt := fmt.Sprintf("I have an image from an %s's(use it when want to write about him instead of writing 'user') Instagram story. Your task is to determine if it contains any interesting or relevant information about the person's life. If it does, summarize this information in 1 short sentence. If the image content is not related to the person's personal life, not inteserting or important activities, return following response: 'Nothing interesting'. Give logically connected summarize based on old storieses(if it is empty- don't say me it is empty, give result only based on photo or return empty response):%s. Don't repeat what is already summarized and in old storieses. Additional stories info: events: %s, hashtags: %s, polls: %s, locations: %s, questions: %s, sliders: %s, mentions: %s. Maximum tokens: 75, write it as simple as possible, like people would say, use simple words",
+					stories.User.Username, temp, stories.StoryEvents, stories.StoryHashtags, stories.StoryPolls, stories.StoryLocations, stories.StorySliders, stories.StoryQuestions, stories.Mentions)
 				resp, err := openai.SummarizeImage(media.URL, prompt)
 				if err != nil {
 					log.Printf("Failed to summarize image: %v", err)
 					sendMessage(conn, "Failed to summarize image")
-					continue
+					break
 				}
 				log.Println("Image summarized successfully.")
 				if sendMessageWithCheck(conn, "Summarized image") {
@@ -127,6 +131,7 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 						temp = append(temp, tempStoriesType)
 					}
 				}
+				break
 			}
 		}
 
