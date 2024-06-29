@@ -101,7 +101,7 @@ func LinkTelegram(userId int8, telegramId int8) error {
 	updateData := map[string]interface{}{
 		"telegram": telegramId,
 	}
-	var data map[string]interface{}
+	var data []map[string]interface{}
 	err := supabase.DB.From("users").Update(updateData).Eq("id", fmt.Sprintf("%d", userId)).Execute(&data)
 	return err
 }
