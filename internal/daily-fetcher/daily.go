@@ -87,7 +87,7 @@ func processUsers(users []db.Instagram) {
 
 			} else {
 				formatted := formatStoriesForTelegram(result)
-				err = telegram.SendMessage(int(telegramId), formatted)
+				err = telegram.SendMessage(telegramId, formatted)
 				if err != nil {
 					log.Println(err)
 					return

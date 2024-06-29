@@ -124,13 +124,13 @@ func GetInstas() ([]Instagram, error) {
 	return data, nil
 }
 
-func GetEmail(id int8) (string, int8, error) {
+func GetEmail(id int8) (string, int, error) {
 	var data []map[string]interface{}
 	err := supabase.DB.From("users").Select("*").Eq("id", fmt.Sprintf("%d", id)).Execute(&data)
 	if err != nil {
 		return "", 0, err
 	}
-	return data[0]["email"].(string), int8(data[0]["telegram"].(float64)), nil
+	return data[0]["email"].(string), int(data[0]["telegram"].(float64)), nil
 }
 
 func LeftToReactLimit(id int8) (int8, error) {

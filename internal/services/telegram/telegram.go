@@ -32,7 +32,7 @@ func InitTelegram() error {
 
 	bot.Handle("/start", HandleStart)
 	bot.Handle(tb.OnText, HandleMessages)
-	SendMessage(939659614, "some")
+	SendMessage(939659614, "Bot is running")
 
 	bot.Start()
 
@@ -94,9 +94,8 @@ func HandleMessages(c tb.Context) error {
 }
 
 func SendMessage(telegramId int, text string) error {
+	log.Println(telegramId)
 	recipient := &tb.User{ID: int64(telegramId)}
-	log.Println(92)
-	log.Println(bot)
 	_, err := bot.Send(recipient, text)
 	if err != nil {
 		return fmt.Errorf("failed to send message: %w", err)
