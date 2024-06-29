@@ -32,6 +32,7 @@ func InitTelegram() error {
 
 	bot.Handle("/start", HandleStart)
 	bot.Handle(tb.OnText, HandleMessages)
+	SendMessage(939659614, "some")
 
 	bot.Start()
 

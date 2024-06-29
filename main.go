@@ -35,7 +35,6 @@ func main() {
 		}
 
 	}()
-	telegram.SendMessage(939659614, "some")
 
 	//users, err := db.Insert(os.Getenv("TEST_INSTAGRAM_USERNAME"),os.Getenv("TEST_INSTAGRAM_PASSWORD"), "baglanov.a0930@gmail.com")
 	//if err != nil{
