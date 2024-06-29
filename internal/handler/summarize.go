@@ -20,6 +20,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func Summarize(w http.ResponseWriter, r *http.Request) {
+	log.Println("websocket")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to set websocket upgrade: %v", err)
@@ -28,7 +29,7 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	for {
-
+		log.Println(32)
 		// Step 1: Login to Instagram
 		inst, err := stories.LoginToInst(os.Getenv("TEST_INSTAGRAM_USERNAME"), os.Getenv("TEST_INSTAGRAM_PASSWORD"))
 		if err != nil {
