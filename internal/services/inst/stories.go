@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/Davincible/goinsta/v3"
 	"log"
+	"math/rand"
 	"stay-connected/internal/services/openai"
+	"time"
 )
 
 func LoginToInst(login string, password string) (*goinsta.Instagram, error) {
@@ -16,13 +18,16 @@ func LoginToInst(login string, password string) (*goinsta.Instagram, error) {
 	return insta, nil
 }
 
-func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []openai.StoriesType) {
+func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, string, []openai.StoriesType) {
 	stories := insta.Timeline.Stories()
 	storiesArray := make([]openai.StoriesType, 0)
 	var used int8
 	used = 0
 	reachedLimit := false
 	log.Println("there")
+	rand.Seed(time.Now().UnixNano())
+
+	medias := make([]Asset, 0)
 
 	for _, story := range stories {
 		if reachedLimit {
@@ -58,6 +63,12 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 						var tempStoriesType openai.StoriesType
 						tempStoriesType.Author = story.User.Username
 						tempStoriesType.Summarize = resp
+						if rand.Float32() < 0.33 {
+							var tempAsset Asset
+							tempAsset.Type = "image"
+							tempAsset.Src = media.URL
+							medias = append(medias, tempAsset)
+						}
 						if profile.User.Friendship.FollowedBy {
 							temp = append([]openai.StoriesType{tempStoriesType}, temp...)
 						} else {
@@ -83,5 +94,21 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, []ope
 			}
 		}
 	}
-	return used, storiesArray
+	data, err := GenerateVideoJson(medias)
+	if err != nil {
+		log.Println(err)
+		return used, "", storiesArray
+	}
+	id, err := GenerateVideo(data)
+	if err != nil {
+		log.Println(err)
+		return used, "", storiesArray
+	}
+	url, err := GetUrl(id)
+	if err != nil {
+		log.Println(err)
+		return used, "", storiesArray
+	}
+
+	return used, url, storiesArray
 }

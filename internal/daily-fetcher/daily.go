@@ -65,7 +65,7 @@ func processUsers(users []db.Instagram) {
 				return
 			}
 
-			used, result := stories.SummarizeInstagramStories(inst, left)
+			used, url, result := stories.SummarizeInstagramStories(inst, left)
 
 			for _, res := range result {
 				log.Println(res)
@@ -77,6 +77,13 @@ func processUsers(users []db.Instagram) {
 				return
 			}
 			if telegramId != -1 {
+				if url != "" {
+					err = telegram.SendAlbum(telegramId, url)
+					if err != nil {
+						log.Println(err)
+						return
+					}
+				}
 				formatted := formatStoriesForTelegram(result)
 				err = telegram.SendMessage(telegramId, formatted)
 				if err != nil {

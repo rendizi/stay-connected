@@ -1,31 +1,192 @@
 package stories
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
+	"log"
+	"math/rand"
 	"net/http"
 	"os"
-	"os/exec"
+	"time"
 )
 
-func downloadVideo(url string, filename string) error {
-	resp, err := http.Get(url)
+type Data struct {
+	Timeline Timeline `json:"timeline"`
+	Output   struct {
+		Format     string `json:"format"`
+		Resolution string `json:"resolution"`
+	} `json:"output"`
+}
+
+type Timeline struct {
+	Soundtrack struct {
+		Src    string `json:"src"`
+		Effect string `json:"effect"`
+	} `json:"soundtrack"`
+	Tracks []Track `json:"tracks"`
+}
+
+type Asset struct {
+	Type string `json:"type"`
+	Src  string `json:"src"`
+}
+
+type Transition struct {
+	In  string `json:"in,omitempty"`
+	Out string `json:"out"`
+}
+
+type Clip struct {
+	Asset      Asset      `json:"asset"`
+	Start      int        `json:"start"`
+	Length     int        `json:"length"`
+	Effect     string     `json:"effect"`
+	Transition Transition `json:"transition"`
+}
+
+func GenerateVideoJson(medias []Asset) (Data, error) {
+	rand.Seed(time.Now().UnixNano())
+
+	effects := []string{"zoomIn", "slideUp", "slideLeft", "zoomOut", "slideDown", "slideRight"}
+
+	var clips []Clip
+	start := 0
+
+	for i, media := range medias {
+		var clip Clip
+		clip.Asset = media
+		clip.Start = start
+
+		clip.Length = rand.Intn(3) + 1
+
+		clip.Effect = effects[rand.Intn(len(effects))]
+
+		if i == 0 {
+			clip.Transition = Transition{
+				In:  "fade",
+				Out: "fade",
+			}
+		} else {
+			clip.Transition = Transition{
+				Out: "fade",
+			}
+		}
+
+		clips = append(clips, clip)
+
+		start += clip.Length - 1
+	}
+
+	var resultRequest Data
+	resultRequest.Output.Format = "mp4"
+	resultRequest.Output.Resolution = "sd"
+	var timeline Timeline
+	timeline.Tracks = []Track{
+		{Clips: clips},
+	}
+	timeline.Soundtrack.Src = "https://shotstack-assets.s3-ap-southeast-2.amazonaws.com/music/freepd/advertising.mp3"
+	timeline.Soundtrack.Effect = "fadeInFadeOut"
+	resultRequest.Timeline = timeline
+	return resultRequest, nil
+}
+
+type Track struct {
+	Clips []Clip `json:"clips"`
+}
+
+func GenerateVideo(request Data) (string, error) {
+	requestJson, err := json.Marshal(request)
 	if err != nil {
-		return err
+		return "", err
+	}
+
+	apiKey := os.Getenv("SHOTSTACK_API_KEY")
+	if apiKey == "" {
+		return "", errors.New("SHOTSTACK_API_KEY not set in environment")
+	}
+
+	req, err := http.NewRequest("POST", "https://api.shotstack.io/edit/stage/render", bytes.NewBuffer(requestJson))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", apiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	out, err := os.Create(filename)
-	if err != nil {
-		return err
+	var result map[string]interface{}
+	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
 	}
-	defer out.Close()
 
-	_, err = io.Copy(out, resp.Body)
-	return err
+	if success, ok := result["success"].(bool); !ok || !success {
+		log.Println(success)
+		return "", errors.New("failed to queue render: " + result["message"].(string))
+	}
+
+	responseData, ok := result["response"].(map[string]interface{})
+	if !ok {
+		return "", errors.New("invalid response format")
+	}
+
+	renderID, ok := responseData["id"].(string)
+	if !ok {
+		log.Println(responseData)
+		return "", errors.New("render ID not found or not a string")
+	}
+
+	return renderID, nil
+
+	return renderID, nil
 }
 
-func extractFrames(videoPath string, outputDir string) error {
-	cmd := exec.Command("ffmpeg", "-i", videoPath, "-vf", "fps=1", fmt.Sprintf("%s/frame_%%03d.jpg", outputDir))
-	return cmd.Run()
+func GetUrl(id string) (string, error) {
+	for {
+		url := fmt.Sprintf("https://api.shotstack.io/edit/stage/render/%s", id)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Fatal("Error creating request:", err)
+		}
+
+		req.Header.Set("x-api-key", os.Getenv("SHOTSTACK_API_KEY"))
+
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal("Error sending request:", err)
+		}
+
+		var response map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			log.Fatal("Error decoding response body:", err)
+		}
+
+		success, ok := response["success"].(bool)
+		if !ok {
+			log.Fatal("Invalid response format, 'success' field not found or not a boolean")
+		}
+
+		if success {
+			url, ok = response["response"].(map[string]interface{})["url"].(string)
+			if !ok {
+				return "", fmt.Errorf("URL not found in response")
+			}
+			resp.Body.Close()
+			return url, nil
+		} else {
+			fmt.Println("Render was not successful. Retrying in 5 seconds...")
+			time.Sleep(5 * time.Second)
+		}
+
+		resp.Body.Close()
+	}
 }

@@ -101,3 +101,13 @@ func SendMessage(telegramId int, text string) error {
 	}
 	return nil
 }
+
+func SendAlbum(telegramId int, src string) error {
+	recipient := &tb.User{ID: int64(telegramId)}
+	v := &tb.Video{File: tb.FromURL(src)}
+	_, err := bot.Send(recipient, v)
+	if err != nil {
+		return fmt.Errorf("failed to send message: %w", err)
+	}
+	return nil
+}
