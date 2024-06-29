@@ -94,7 +94,6 @@ func HandleMessages(c tb.Context) error {
 }
 
 func SendMessage(telegramId int, text string) error {
-	log.Println(telegramId)
 	recipient := &tb.User{ID: int64(telegramId)}
 	_, err := bot.Send(recipient, text)
 	if err != nil {
