@@ -29,7 +29,10 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 
 	medias := make([]Asset, 0)
 
-	for _, story := range stories {
+	for i, story := range stories {
+		if i >= 3{
+			break 
+		}
 		if reachedLimit {
 			break
 		}
