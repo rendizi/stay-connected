@@ -171,6 +171,8 @@ func GetUrl(id string) (string, error) {
 			log.Fatal("Error decoding response body:", err)
 		}
 
+		log.Println(response)
+
 		success, ok := response["success"].(bool)
 		if !ok {
 			log.Fatal("Invalid response format, 'success' field not found or not a boolean")
