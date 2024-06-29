@@ -87,7 +87,7 @@ func HandleMessages(c tb.Context) error {
 	}
 }
 
-func SendMessage(telegramId int8, text string) error {
+func SendMessage(telegramId int, text string) error {
 	log.Println(telegramId)
 	log.Println(int64(telegramId))
 	recipient := &tb.User{ID: int64(telegramId)}
