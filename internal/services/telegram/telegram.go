@@ -74,6 +74,7 @@ func HandleMessages(c tb.Context) error {
 			userData[user.ID].Password = "awaiting_email"
 			return c.Send(err.Error() + ". Awaiting for email")
 		}
+		log.Println(user.ID)
 		err = db.LinkTelegram(id, int8(user.ID))
 		if err != nil {
 			userData[user.ID].Password = "awaiting_email"
