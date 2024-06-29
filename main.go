@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/MadAppGang/httplog"
+	"github.com/jasonlvhit/gocron"
 	"log"
 	"net/http"
 	"os"
@@ -43,13 +44,13 @@ func main() {
 	//}
 	//log.Println(users)
 
-	go daily.Do()
+	//go daily.Do()
 	//err = mailer.Send("alikhan2008ba@gmail.com", "something")
 	//log.Fatal(err)
 
-	//s := gocron.NewScheduler()
-	//s.Every(1).Days().Do(daily.Do)
-	//<-s.Start()
+	s := gocron.NewScheduler()
+	s.Every(1).Days().Do(daily.Do)
+	<-s.Start()
 
 	//fullusers, err := db.Get()
 	//if err != nil{
