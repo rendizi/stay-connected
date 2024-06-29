@@ -27,7 +27,7 @@ func main() {
 	mux.Handle("/api/v1/daily", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		go daily.Do()
 	})))
-	mux.Handle("/api/v1/summarize", httplog.Logger(http.HandlerFunc(handler.Summarize)))
+	mux.Handle("/", httplog.Logger(http.HandlerFunc(handler.Summarize)))
 
 	go func() {
 		err := telegram.InitTelegram()

@@ -105,9 +105,9 @@ func processUsers(users []db.Instagram) {
 func formatStoriesForTelegram(stories []openai.StoriesType) string {
 	var builder strings.Builder
 
-	builder.WriteString("**What is going on today?:**\n\n")
+	builder.WriteString("What is going on today?:\n\n")
 	for _, story := range stories {
-		builder.WriteString(fmt.Sprintf("• **%s**: __%s__\n", story.Author, story.Summarize))
+		builder.WriteString(fmt.Sprintf("• %s: %s\n", story.Author, story.Summarize))
 	}
 
 	return builder.String()
