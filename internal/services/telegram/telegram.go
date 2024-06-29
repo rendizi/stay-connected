@@ -88,6 +88,8 @@ func HandleMessages(c tb.Context) error {
 }
 
 func SendMessage(telegramId int8, text string) error {
+	log.Println(telegramId)
+	log.Println(int64(telegramId))
 	recipient := &tb.User{ID: int64(telegramId)}
 	_, err := bot.Send(recipient, text)
 	if err != nil {
