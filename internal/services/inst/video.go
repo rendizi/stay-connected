@@ -181,10 +181,11 @@ func GetUrl(id string) (string, error) {
 		if success {
 			url, ok = response["response"].(map[string]interface{})["url"].(string)
 			if !ok {
-				return "", fmt.Errorf("URL not found in response")
-			}
+				time.Sleep(5 * time.Second)
+			}else{
 			resp.Body.Close()
-			return url, nil
+			return url, nil}
+
 		} else {
 			fmt.Println("Render was not successful. Retrying in 5 seconds...")
 			time.Sleep(5 * time.Second)
