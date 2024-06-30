@@ -2,7 +2,7 @@ package stories
 
 import (
 	"fmt"
-	"github.com/Davincible/goinsta/v3"
+	"github.com/Davincible/goinsta"
 	"log"
 	"math/rand"
 	"stay-connected/internal/services/openai"
@@ -29,10 +29,7 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 
 	medias := make([]Asset, 0)
 
-	for i, story := range stories {
-		if i >= 3{
-			break 
-		}
+	for _, story := range stories {
 		if reachedLimit {
 			break
 		}

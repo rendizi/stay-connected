@@ -3,7 +3,7 @@ module stay-connected
 go 1.22.4
 
 require (
-	github.com/Davincible/goinsta/v3 v3.2.6
+	github.com/Davincible/goinsta v0.0.0-20220425072628-96aad7267204
 	github.com/MadAppGang/httplog v1.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-resty/resty/v2 v2.13.1
@@ -29,7 +29,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/nedpals/postgrest-go v0.1.3 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
