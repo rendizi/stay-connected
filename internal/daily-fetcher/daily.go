@@ -120,7 +120,7 @@ func formatStoriesForTelegram(stories []openai.StoriesType) string {
 	return builder.String()
 }
 
-func formatStoriesForEmail(stories []openai.StoriesType) string {
+func formatStoriesForEmail(stories []openai.StoriesType, url string) string {
 	var builder strings.Builder
 
 	builder.WriteString(`
@@ -150,6 +150,17 @@ func formatStoriesForEmail(stories []openai.StoriesType) string {
             font-weight: bold;
             margin-bottom: 10px;
         }
+		.video {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .video iframe {
+            width: 100%;
+            max-width: 560px;
+            height: 315px;
+            border: none;
+            border-radius: 10px;
+            
         .story {
             margin-bottom: 20px;
         }
@@ -161,6 +172,9 @@ func formatStoriesForEmail(stories []openai.StoriesType) string {
 <body>
     <div class="container">
         <div class="title">Daily Stories</div>
+<div class="video">
+            <iframe src="` + url + `" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
         <hr>
 `)
 
