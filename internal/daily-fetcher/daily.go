@@ -66,9 +66,9 @@ func processUsers(users []db.Instagram) {
 			}
 
 			used, url, result := stories.SummarizeInstagramStories(inst, left)
-
-			for _, res := range result {
-				log.Println(res)
+			
+			if len(result) == 0 {
+				return
 			}
 
 			email, telegramId, err := db.GetEmail(u.UserId)
