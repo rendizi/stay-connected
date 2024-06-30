@@ -91,7 +91,7 @@ func processUsers(users []db.Instagram) {
 					return
 				}
 			}
-			formatter := formatStoriesForEmail(result)
+			formatter := formatStoriesForEmail(result, url)
 			err = mailer.Send(email, formatter)
 			if err != nil {
 				log.Println(err)
