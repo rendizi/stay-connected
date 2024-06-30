@@ -58,24 +58,27 @@ func processUsers(users []db.Instagram) {
 				log.Println(err)
 				return
 			}
+			email, telegramId, err := db.GetEmail(u.UserId)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 
 			left, err := db.LeftToReactLimit(u.UserId)
 			if err != nil {
 				log.Println(err)
 				return
 			}
+			if left <= 0 {
+				return
+			}
 
 			used, url, result := stories.SummarizeInstagramStories(inst, left)
-			
+
 			if len(result) == 0 {
 				return
 			}
 
-			email, telegramId, err := db.GetEmail(u.UserId)
-			if err != nil {
-				log.Println(err)
-				return
-			}
 			if telegramId != -1 {
 				if url != "" {
 					err = telegram.SendAlbum(telegramId, url)
@@ -102,6 +105,12 @@ func processUsers(users []db.Instagram) {
 			if err != nil {
 				log.Println(err)
 				return
+			}
+			if used >= left {
+				if telegramId != -1 {
+					telegram.SendMessage(telegramId, "Hey, you reached your usage limit. No more summarizes will be sent to you")
+				}
+				mailer.Send(email, "Hey, you reached your usage limit. No more summarizes will be sent to you")
 			}
 		}(user)
 	}
