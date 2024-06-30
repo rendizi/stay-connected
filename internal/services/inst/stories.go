@@ -81,6 +81,9 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 					}
 					break
 				}
+				if reachedLimit {
+					break
+				}
 			}
 			summarize, err := openai.SummarizeImagesToOne(temp)
 			if err != nil {
