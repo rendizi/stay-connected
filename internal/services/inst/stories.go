@@ -76,6 +76,10 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 						if err != nil {
 							log.Println(err)
 						}
+						used += 1
+						if used >= left {
+							reachedLimit = true
+						}
 					} else {
 						resp = val
 					}
@@ -96,10 +100,7 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 							temp = append(temp, tempStoriesType)
 						}
 					}
-					used += 1
-					if used >= left {
-						reachedLimit = true
-					}
+
 					break
 				}
 				if reachedLimit {
@@ -111,16 +112,27 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 				continue
 			}
 			if summarize != "Nothing interesting" {
-				thisWeek = append(thisWeek, summarize)
-				if len(thisWeek) > 7 {
-					thisWeek = thisWeek[len(thisWeek)-7:]
+				today := time.Now().Format("02.01.2006")
+
+				todayExists := false
+				for _, entry := range thisWeek {
+					if entryContainsDate(entry, today) {
+						todayExists = true
+						break
+					}
 				}
-				stringified, err := json.Marshal(thisWeek)
-				if err != nil {
-					log.Println(err)
-					stringified = []byte(data)
+				if !todayExists {
+					thisWeek = append(thisWeek, summarize+" "+today)
+					if len(thisWeek) > 7 {
+						thisWeek = thisWeek[len(thisWeek)-7:]
+					}
+					stringified, err := json.Marshal(thisWeek)
+					if err != nil {
+						log.Println(err)
+						stringified = []byte(data)
+					}
+					_ = redis.StoreInRedis(context.Background(), story.User.Username, string(stringified), 7*24*time.Hour)
 				}
-				_ = redis.StoreInRedis(context.Background(), story.User.Username, string(stringified), 7*24*time.Hour)
 				var usersStories openai.StoriesType
 				usersStories.Author = story.User.Username
 				usersStories.Summarize = summarize
@@ -145,4 +157,8 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 	}
 
 	return used, url, storiesArray
+}
+
+func entryContainsDate(entry, date string) bool {
+	return len(entry) > 10 && entry[len(entry)-10:] == date
 }
