@@ -1,11 +1,14 @@
 package stories
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/Davincible/goinsta"
 	"log"
 	"math/rand"
 	"stay-connected/internal/services/openai"
+	"stay-connected/internal/services/redis"
 	"time"
 )
 
@@ -49,16 +52,34 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 				continue
 			}
 
+			data, err := redis.GetFromRedis(context.Background(), story.User.Username)
+			if err != nil {
+				log.Println("Error while getting "+story.User.Username+"' stories summarize history", err.Error)
+			}
+			var thisWeek []string
+			err = json.Unmarshal([]byte(data), &thisWeek)
+			if err != nil {
+				log.Println(err)
+			}
 			for _, stories := range profilesStories.Reel.Items {
 				for _, media := range stories.Images.Versions {
-
-					prompt := fmt.Sprintf("I have an image from an %s's(use it when want to write about him instead of writing 'user') Instagram story. Your task is to determine if it contains any interesting or relevant information about the person's life. If it does, summarize this information in 1 short sentence. If the image content is not related to the person's personal life, not inteserting or important activities, return following response: 'Nothing interesting'. Give logically connected summarize based on old storieses(if it is empty- don't say me it is empty, give result only based on photo or return empty response):%s. Don't repeat what is already summarized and in old storieses. Additional stories info: events: %s, hashtags: %s, polls: %s, locations: %s, questions: %s, sliders: %s, mentions: %s. Maximum tokens: 75, write it as simple as possible, like people would say, use simple words",
-						story.User.Username, temp, stories.StoryEvents, stories.StoryHashtags, stories.StoryPolls, stories.StoryLocations, stories.StorySliders, stories.StoryQuestions, stories.Mentions)
-					resp, err := openai.SummarizeImage(media.URL, prompt)
-					log.Println(media.URL)
+					val, err := redis.GetFromRedis(context.Background(), media.URL)
+					var resp string
 					if err != nil {
-						log.Println(err)
+						prompt := fmt.Sprintf("I have an image from an %s's(use it when want to write about him instead of writing 'user') Instagram story. Your task is to determine if it contains any interesting or relevant information about the person's life. If it does, summarize this information in 1 short sentence. If the image content is not related to the person's personal life, not inteserting or important activities, return following response: 'Nothing interesting'. Give logically connected summarize based on previous storieses(if it is empty- don't say me it is empty, give result only based on photo or return empty response):%s.Last 7 days stories: %s. Don't repeat what is already summarized and in old storieses. Additional stories info: events: %s, hashtags: %s, polls: %s, locations: %s, questions: %s, sliders: %s, mentions: %s. Maximum tokens: 75, write it as simple as possible, like people would say, use simple words",
+							story.User.Username, temp, data, stories.StoryEvents, stories.StoryHashtags, stories.StoryPolls, stories.StoryLocations, stories.StorySliders, stories.StoryQuestions, stories.Mentions)
+						resp, err = openai.SummarizeImage(media.URL, prompt)
+						if err != nil {
+							log.Println(err)
+						}
+						err = redis.StoreInRedis(context.Background(), media.URL, resp, 24*time.Hour)
+						if err != nil {
+							log.Println(err)
+						}
+					} else {
+						resp = val
 					}
+
 					if resp != "Nothing interesting" {
 						var tempStoriesType openai.StoriesType
 						tempStoriesType.Author = story.User.Username
@@ -90,6 +111,16 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 				continue
 			}
 			if summarize != "Nothing interesting" {
+				thisWeek = append(thisWeek, summarize)
+				if len(thisWeek) > 7 {
+					thisWeek = thisWeek[len(thisWeek)-7:]
+				}
+				stringified, err := json.Marshal(thisWeek)
+				if err != nil {
+					log.Println(err)
+					stringified = []byte(data)
+				}
+				_ = redis.StoreInRedis(context.Background(), story.User.Username, string(stringified), 7*24*time.Hour)
 				var usersStories openai.StoriesType
 				usersStories.Author = story.User.Username
 				usersStories.Summarize = summarize

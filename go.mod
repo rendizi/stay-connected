@@ -6,6 +6,7 @@ require (
 	github.com/Davincible/goinsta v0.0.0-20220425072628-96aad7267204
 	github.com/MadAppGang/httplog v1.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/jasonlvhit/gocron v0.0.1
@@ -16,9 +17,11 @@ require (
 
 require (
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chromedp/cdproto v0.0.0-20220901095120-1a01299a2163 // indirect
 	github.com/chromedp/chromedp v0.8.5 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect

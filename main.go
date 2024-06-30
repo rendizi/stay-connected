@@ -11,11 +11,16 @@ import (
 	"stay-connected/internal/handler"
 	"stay-connected/internal/server"
 	"stay-connected/internal/services/db"
+	"stay-connected/internal/services/redis"
 	"stay-connected/internal/services/telegram"
 )
 
 func main() {
 	db.InitSupabase()
+	err := redis.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /api/v1/register", httplog.Logger(http.HandlerFunc(handler.Register)))
@@ -79,7 +84,7 @@ func main() {
 	}
 	fmt.Println("server is listening")
 
-	err := http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), corsHandler(mux))
+	err = http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), corsHandler(mux))
 	fmt.Println(err)
 	if err != nil {
 		if err == http.ErrServerClosed {
