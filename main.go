@@ -30,9 +30,9 @@ func main() {
 	mux.Handle("/api/v1/health", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		server.Ok(map[string]interface{}{"message": "alright"}, w)
 	})))
-	mux.Handle("/api/v1/daily", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		go daily.Do()
-	})))
+	// mux.Handle("/api/v1/daily", httplog.Logger(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 	go daily.Do()
+	// })))
 	mux.Handle("/", httplog.Logger(http.HandlerFunc(handler.Summarize)))
 
 	go func() {
