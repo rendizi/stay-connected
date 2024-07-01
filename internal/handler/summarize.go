@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"stay-connected/internal/server"
+	"stay-connected/internal/services/db"
 	stories "stay-connected/internal/services/inst"
 	"stay-connected/internal/services/openai"
 )
@@ -35,8 +37,30 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	for {
-		// Step 1: Login to Instagram
 		_, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message from client:", err)
+			sendMessage(conn, "Error reading message")
+			break
+		}
+		id := server.GetIdFromToken(string(p))
+		if id == 0 {
+			sendMessage(conn, "You need to sign in first")
+			break
+		}
+
+		left, err := db.LeftToReactLimit(id)
+		if err != nil {
+			sendMessage(conn, err.Error())
+			break
+		}
+		if left == 0 {
+			sendMessage(conn, "you have reached usage limit")
+			break
+		}
+
+		// Step 1: Login to Instagram
+		_, p, err = conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message from client:", err)
 			sendMessage(conn, "Error reading message")
@@ -101,8 +125,9 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 		if sendMessageWithCheck(conn, "Processing user's stories for summarization...") {
 			break
 		}
+		k := 0
 		for i, stories := range profilesStories.Reel.Items {
-			if i >= 10 {
+			if i >= 10 || i >= int(left) {
 				break
 			}
 			for _, media := range stories.Images.Versions {
@@ -128,6 +153,7 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 					if sendMessageWithCheck(conn, tempStoriesType.Summarize) {
 						break
 					}
+					k += 1
 					if profile.User.Friendship.FollowedBy {
 						temp = append([]openai.StoriesType{tempStoriesType}, temp...)
 					} else {
@@ -136,6 +162,10 @@ func Summarize(w http.ResponseWriter, r *http.Request) {
 				}
 				break
 			}
+		}
+		err = db.Used(id, int8(k))
+		if err != nil {
+			log.Printf("Failed to use user: %v", err)
 		}
 
 		// Summarize all images to one result
@@ -172,6 +202,7 @@ func sendMessageWithCheck(conn *websocket.Conn, message string) bool {
 		log.Println("WebSocket connection closed due to send error.")
 		return true
 	}
+
 	return false
 }
 

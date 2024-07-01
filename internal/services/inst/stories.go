@@ -84,7 +84,7 @@ func SummarizeInstagramStories(insta *goinsta.Instagram, left int8) (int8, strin
 						resp = val
 					}
 
-					if resp != "Nothing interesting" {
+					if resp != "Nothing interesting" || resp != "Nothing interesting." {
 						var tempStoriesType openai.StoriesType
 						tempStoriesType.Author = story.User.Username
 						tempStoriesType.Summarize = resp

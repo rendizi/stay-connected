@@ -37,3 +37,26 @@ func GetId(w http.ResponseWriter, r *http.Request) int8 {
 
 	return int8(id)
 }
+
+func GetIdFromToken(tokenString string) int8 {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil || !token.Valid {
+		return 0
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0
+	}
+	id, ok := claims["id"].(float64)
+	if !ok {
+		return 0
+	}
+
+	return int8(id)
+}
